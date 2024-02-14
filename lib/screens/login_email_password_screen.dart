@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_firebase_auth/services/firebase_methods.dart';
 
 import '../widgets/custom_textfield.dart';
 
@@ -14,12 +15,19 @@ class EmailPasswordLoginState extends State<EmailPasswordLogin> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-
   @override
   void dispose() {
     super.dispose();
     emailController.dispose();
     emailController.dispose();
+  }
+
+  void signInUser() async {
+    await FirebaseMethods().signInUser(
+      email: emailController.text,
+      password: passwordController.text,
+      context: context,
+    );
   }
 
   @override
@@ -50,9 +58,7 @@ class EmailPasswordLoginState extends State<EmailPasswordLogin> {
           ),
           const SizedBox(height: 40),
           ElevatedButton(
-            onPressed: () {
-              
-            },
+            onPressed: signInUser,
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(Colors.blue),
               textStyle: MaterialStateProperty.all(

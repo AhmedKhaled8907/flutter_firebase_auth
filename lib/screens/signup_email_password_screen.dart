@@ -1,6 +1,5 @@
 // ignore_for_file: library_private_types_in_public_api
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_firebase_auth/widgets/custom_textfield.dart';
 
@@ -26,7 +25,7 @@ class _EmailPasswordSignupState extends State<EmailPasswordSignup> {
   }
 
   void signUpUser() async {
-    FirebaseMethods(FirebaseAuth.instance).signUpUser(
+    FirebaseMethods().signUpUser(
       email: emailController.text,
       password: passwordController.text,
       context: context,
