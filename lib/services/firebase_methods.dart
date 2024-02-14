@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously, avoid_print
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_firebase_auth/utils/show_otp_dialog.dart';
 
@@ -59,31 +60,51 @@ class FirebaseMethods {
     BuildContext context,
   ) async {
     final codeController = TextEditingController();
-    await _auth.verifyPhoneNumber(
-      phoneNumber: phoneNumber,
-      verificationCompleted: (PhoneAuthCredential credential) async {
-        await _auth.signInWithCredential(credential);
-      },
-      verificationFailed: (FirebaseAuthException e) {
-        showSnackBar(context, e.message!);
-      },
-      codeSent: (String verificationId, int? resendToken) async {
-        showOtpDialog(
-          codeController: codeController,
-          context: context,
-          onPressed: () async {
-            PhoneAuthCredential credential = PhoneAuthProvider.credential(
-              verificationId: verificationId,
-              smsCode: codeController.text.trim(),
-            );
-            await _auth.signInWithCredential(credential);
-            Navigator.pop(context);
-          },
-        );
-      },
-      codeAutoRetrievalTimeout: (String verificationId) {
-        // Auto-resolution timed out...
-      },
-    );
+
+    if (kIsWeb) {
+      // WEB ONLY
+      ConfirmationResult result =
+          await _auth.signInWithPhoneNumber(phoneNumber);
+      showOtpDialog(
+        codeController: codeController,
+        context: context,
+        onPressed: () async {
+          PhoneAuthCredential credential = PhoneAuthProvider.credential(
+            verificationId: result.verificationId,
+            smsCode: codeController.text.trim(),
+          );
+          await _auth.signInWithCredential(credential);
+          Navigator.pop(context);
+        },
+      );
+    } else {
+      // IOS AND ANDROID
+      await _auth.verifyPhoneNumber(
+        phoneNumber: phoneNumber,
+        verificationCompleted: (PhoneAuthCredential credential) async {
+          await _auth.signInWithCredential(credential);
+        },
+        verificationFailed: (FirebaseAuthException e) {
+          showSnackBar(context, e.message!);
+        },
+        codeSent: (String verificationId, int? resendToken) async {
+          showOtpDialog(
+            codeController: codeController,
+            context: context,
+            onPressed: () async {
+              PhoneAuthCredential credential = PhoneAuthProvider.credential(
+                verificationId: verificationId,
+                smsCode: codeController.text.trim(),
+              );
+              await _auth.signInWithCredential(credential);
+              Navigator.pop(context);
+            },
+          );
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {
+          // Auto-resolution timed out...
+        },
+      );
+    }
   }
 }
